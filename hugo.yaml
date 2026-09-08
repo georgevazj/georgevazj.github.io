@@ -1,4 +1,4 @@
-baseURL: 'https://<tu-usuario>.github.io/' # Cambia por la URL final de tu repositorio o dominio
+baseURL: 'https://meepleinthecloud.github.io/' # Cambia por la URL final de tu repositorio o dominio
 languageCode: 'es-es'
 title: 'Meeple In The Cloud'
 theme: 'PaperMod'
