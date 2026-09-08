@@ -1,0 +1,15 @@
+baseURL: 'https://<tu-usuario>.github.io/' # Cambia por la URL final de tu repositorio o dominio
+languageCode: 'es-es'
+title: 'Meeple In The Cloud'
+theme: 'PaperMod'
+
+params:
+  author: 'Jorge'
+  description: 'Blog de Arquitectura Cloud, Azure, GCP e Inteligencia Artificial Generativa'
+  ShowCodeCopyButtons: true
+  readingTime: true
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true # Necesario si vas a renderizar diagramas en HTML/Mermaid
