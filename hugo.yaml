@@ -3,6 +3,7 @@ languageCode: 'es-es'
 title: 'Meeple In The Cloud'
 theme: 'PaperMod'
 
+relativeURLs: true
 canonifyURLs: true # Fuerza a Hugo a generar URLs absolutas completas para CSS, JS e imágenes
 
 params:
