@@ -1,10 +1,7 @@
-baseURL: 'https://georgevazj.github.io/meepleinthecloud.github.io/' # Cambia por la URL final de tu repositorio o dominio
+baseURL: 'https://georgevazj.github.io/'
 languageCode: 'es-es'
 title: 'Meeple In The Cloud'
 theme: 'PaperMod'
-
-relativeURLs: true
-canonifyURLs: true # Fuerza a Hugo a generar URLs absolutas completas para CSS, JS e imágenes
 
 params:
   author: 'Jorge'
@@ -15,4 +12,4 @@ params:
 markup:
   goldmark:
     renderer:
-      unsafe: true # Necesario si vas a renderizar diagramas en HTML/Mermaid
+      unsafe: true
