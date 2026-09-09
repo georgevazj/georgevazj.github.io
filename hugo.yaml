@@ -8,6 +8,7 @@ params:
   description: 'Blog de Arquitectura Cloud, Azure, GCP e Inteligencia Artificial Generativa'
   ShowCodeCopyButtons: true
   readingTime: true
+  favicon: true
 
 markup:
   goldmark:
