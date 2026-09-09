@@ -6,6 +6,21 @@
     <description>Recent content in Categories on Meeple In The Cloud</description>
     <generator>Hugo</generator>
     <language>es-es</language>
+    <lastBuildDate>Wed, 09 Sep 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:1313/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>IaC</title>
+      <link>http://localhost:1313/categories/iac/</link>
+      <pubDate>Wed, 09 Sep 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/categories/iac/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Platform Engineering</title>
+      <link>http://localhost:1313/categories/platform-engineering/</link>
+      <pubDate>Wed, 09 Sep 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/categories/platform-engineering/</guid>
+      <description></description>
+    </item>
   </channel>
 </rss>

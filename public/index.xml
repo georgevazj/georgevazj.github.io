@@ -6,8 +6,15 @@
     <description>Recent content on Meeple In The Cloud</description>
     <generator>Hugo</generator>
     <language>es-es</language>
-    <lastBuildDate>Tue, 08 Sep 2026 08:15:07 +0200</lastBuildDate>
+    <lastBuildDate>Wed, 09 Sep 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Deploying This Blog on Azure</title>
+      <link>http://localhost:1313/posts/deploying-this-blog-on-azure/</link>
+      <pubDate>Wed, 09 Sep 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/deploying-this-blog-on-azure/</guid>
+      <description>How I designed and deployed this blog using Hugo, Azure Static Web Apps, Bicep, and GitHub Actions with Workload Identity Federation. No secrets in the pipeline. No excuses.</description>
+    </item>
     <item>
       <title>Hola Mundo</title>
       <link>http://localhost:1313/posts/hola-mundo/</link>

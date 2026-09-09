@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Posts on Meeple In The Cloud</title>
-    <link>http://localhost:1313/posts/</link>
-    <description>Recent content in Posts on Meeple In The Cloud</description>
+    <title>IaC on Meeple In The Cloud</title>
+    <link>http://localhost:1313/categories/iac/</link>
+    <description>Recent content in IaC on Meeple In The Cloud</description>
     <generator>Hugo</generator>
     <language>es-es</language>
     <lastBuildDate>Wed, 09 Sep 2026 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/categories/iac/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Deploying This Blog on Azure</title>
       <link>http://localhost:1313/posts/deploying-this-blog-on-azure/</link>
       <pubDate>Wed, 09 Sep 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/posts/deploying-this-blog-on-azure/</guid>
       <description>How I designed and deployed this blog using Hugo, Azure Static Web Apps, Bicep, and GitHub Actions with Workload Identity Federation. No secrets in the pipeline. No excuses.</description>
-    </item>
-    <item>
-      <title>Hola Mundo</title>
-      <link>http://localhost:1313/posts/hola-mundo/</link>
-      <pubDate>Tue, 08 Sep 2026 08:15:07 +0200</pubDate>
-      <guid>http://localhost:1313/posts/hola-mundo/</guid>
-      <description></description>
     </item>
   </channel>
 </rss>

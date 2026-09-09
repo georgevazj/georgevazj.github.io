@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Deploying This Blog on Azure | Meeple In The Cloud</title>
+<meta name="keywords" content="azure, bicep, hugo, github-actions, static-web-apps, wif, dns, key-vault">
+<meta name="description" content="How I designed and deployed this blog using Hugo, Azure Static Web Apps, Bicep, and GitHub Actions with Workload Identity Federation. No secrets in the pipeline. No excuses.">
+<meta name="author" content="Jorge">
+<link rel="canonical" href="http://localhost:1313/posts/deploying-this-blog-on-azure/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.cd9298b33628769aa1bc1acebbbfd7aa11ce81dfe03484d479e1907760249a1d.css" integrity="sha256-zZKYszYodpqhvBrOu7/XqhHOgd/gNITUeeGQd2Akmh0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/deploying-this-blog-on-azure/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Meeple In The Cloud (Alt + H)">Meeple In The Cloud</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Deploying This Blog on Azure
+    </h1>
+    <div class="post-description">
+      How I designed and deployed this blog using Hugo, Azure Static Web Apps, Bicep, and GitHub Actions with Workload Identity Federation. No secrets in the pipeline. No excuses.
+    </div>
+    <div class="post-meta">
+
+<span title='2026-09-09 00:00:00 +0000 UTC'>9 de septiembre de 2026</span>&nbsp;·&nbsp;<span>Jorge</span>
+
+</div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="http://localhost:1313/featured.png" alt="Meeple in the Cloud blog architecture diagram">
+        
+</figure><details class="toc" >
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#the-constraints-i-set-for-myself" aria-label="The constraints I set for myself">The constraints I set for myself</a></li>
+            <li>
+                <a href="#architecture-overview" aria-label="Architecture overview">Architecture overview</a></li>
+            <li>
+                <a href="#the-decisions" aria-label="The decisions">The decisions</a><ul>
+                    
+            <li>
+                <a href="#hugo-over-a-cms" aria-label="Hugo over a CMS">Hugo over a CMS</a></li>
+            <li>
+                <a href="#azure-static-web-apps-over-blob-storage--cdn" aria-label="Azure Static Web Apps over Blob Storage &#43; CDN">Azure Static Web Apps over Blob Storage + CDN</a></li>
+            <li>
+                <a href="#azure-dns-zone" aria-label="Azure DNS Zone">Azure DNS Zone</a></li>
+            <li>
+                <a href="#key-vault-for-the-swa-deployment-token" aria-label="Key Vault for the SWA deployment token">Key Vault for the SWA deployment token</a></li>
+            <li>
+                <a href="#workload-identity-federation-over-service-principal-secrets" aria-label="Workload Identity Federation over Service Principal secrets">Workload Identity Federation over Service Principal secrets</a></li></ul>
+            </li>
+            <li>
+                <a href="#the-bicep-structure" aria-label="The Bicep structure">The Bicep structure</a><ul>
+                    
+            <li>
+                <a href="#mainbicep--the-orchestrator" aria-label="main.bicep — the orchestrator">main.bicep — the orchestrator</a></li>
+            <li>
+                <a href="#the-token-handoff-in-swabicep" aria-label="The token handoff in swa.bicep">The token handoff in swa.bicep</a></li>
+            <li>
+                <a href="#rbac-in-keyvaultbicep" aria-label="RBAC in keyvault.bicep">RBAC in keyvault.bicep</a></li></ul>
+            </li>
+            <li>
+                <a href="#the-pipelines" aria-label="The pipelines">The pipelines</a><ul>
+                    
+            <li>
+                <a href="#infrastructure-pipeline-deploy-infrayml" aria-label="Infrastructure pipeline (deploy-infra.yml)">Infrastructure pipeline (deploy-infra.yml)</a></li>
+            <li>
+                <a href="#blog-pipeline-deploy-blogyml" aria-label="Blog pipeline (deploy-blog.yml)">Blog pipeline (deploy-blog.yml)</a></li></ul>
+            </li>
+            <li>
+                <a href="#setting-up-wif" aria-label="Setting up WIF">Setting up WIF</a></li>
+            <li>
+                <a href="#cost-breakdown" aria-label="Cost breakdown">Cost breakdown</a></li>
+            <li>
+                <a href="#what-id-do-differently" aria-label="What I&rsquo;d do differently">What I&rsquo;d do differently</a></li>
+            <li>
+                <a href="#the-full-code" aria-label="The full code">The full code</a>
+            </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><p>A blog about cloud architecture should be deployed with the same rigour you&rsquo;d apply to any other workload. That means Infrastructure as Code, a proper CI/CD pipeline, zero plaintext secrets, and a cost you can justify — even if you&rsquo;re justifying it only to yourself.</p>
+<p>This post walks through every decision I made building <strong>Meeple In The Cloud</strong>: why I chose each component, what I considered and discarded, and the Bicep code that puts it all together.</p>
+<hr>
+<h2 id="the-constraints-i-set-for-myself">The constraints I set for myself<a hidden class="anchor" aria-hidden="true" href="#the-constraints-i-set-for-myself">#</a></h2>
+<p>Before picking any technology, I defined what I actually needed:</p>
+<ul>
+<li><strong>Zero-ops</strong> — I want to write, not manage servers or certificates</li>
+<li><strong>IaC from day one</strong> — the infrastructure must be reproducible from a <code>git clone</code></li>
+<li><strong>No secrets in the pipeline</strong> — Workload Identity Federation or nothing</li>
+<li><strong>Custom domain with HTTPS</strong> — <code>www.meepleinthecloud.com</code>, managed in Azure</li>
+<li><strong>Cost under €1/month</strong> — this is a blog, not a SaaS product</li>
+</ul>
+<p>These constraints eliminated a lot of options early on.</p>
+<hr>
+<h2 id="architecture-overview">Architecture overview<a hidden class="anchor" aria-hidden="true" href="#architecture-overview">#</a></h2>
+<pre tabindex="0"><code>┌─────────────────────────────────────────────────────┐
+│                   GitHub                            │
+│                                                     │
+│  meeple-in-the-cloud-blog   meeple-in-the-cloud-infra│
+│  ├── content/             ├── bicep/                │
+│  └── .github/workflows/   └── .github/workflows/   │
+│      deploy-blog.yml          deploy-infra.yml      │
+└──────────┬──────────────────────────┬───────────────┘
+           │ WIF (no secrets)         │ WIF (no secrets)
+           ▼                          ▼
+┌─────────────────────────────────────────────────────┐
+│              Azure Subscription                     │
+│                                                     │
+│  ┌─────────────────────────────────────────────┐   │
+│  │  rg-mitc-prd-blog                           │   │
+│  │                                             │   │
+│  │  ┌──────────────┐   ┌───────────────────┐  │   │
+│  │  │  DNS Zone    │   │  Key Vault        │  │   │
+│  │  │  meeple      │   │  swa-deploy-token │  │   │
+│  │  │  inthecloud  │   │  (Secrets Officer)│  │   │
+│  │  │  .com        │   │                   │  │   │
+│  │  └──────┬───────┘   └────────┬──────────┘  │   │
+│  │         │ CNAME www          │ reads token  │   │
+│  │         ▼                    ▼              │   │
+│  │  ┌──────────────────────────────────────┐  │   │
+│  │  │  Azure Static Web Apps (Free)        │  │   │
+│  │  │  Hugo build · CDN · HTTPS · Previews │  │   │
+│  │  └──────────────────────────────────────┘  │   │
+│  └─────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────┘
+</code></pre><p>Two repos, three Azure resources, two pipelines. That&rsquo;s the whole thing.</p>
+<hr>
+<h2 id="the-decisions">The decisions<a hidden class="anchor" aria-hidden="true" href="#the-decisions">#</a></h2>
+<h3 id="hugo-over-a-cms">Hugo over a CMS<a hidden class="anchor" aria-hidden="true" href="#hugo-over-a-cms">#</a></h3>
+<p>The temptation with a new blog is to reach for something like Ghost or WordPress — a proper CMS with an editor, plugins, and a database. I&rsquo;ve been down that road. The operational overhead always ends up eating into writing time.</p>
+<p>Hugo generates static HTML from Markdown files. There&rsquo;s no database, no runtime, no process to keep alive. Posts are just files in a git repository — version controlled, diffable, and editable in VS Code. For a technical blog where code blocks are first-class content, Markdown is the right substrate.</p>
+<p>The build is also fast enough to feel instantaneous locally, which matters when you&rsquo;re iterating on layout or formatting.</p>
+<h3 id="azure-static-web-apps-over-blob-storage--cdn">Azure Static Web Apps over Blob Storage + CDN<a hidden class="anchor" aria-hidden="true" href="#azure-static-web-apps-over-blob-storage--cdn">#</a></h3>
+<p>Azure Static Web Apps (SWA) is the obvious choice here, but it&rsquo;s worth explaining why over the manual alternative of Blob Storage + Azure CDN.</p>
+<p>SWA gives you CDN, HTTPS, and custom domain management in a single resource with zero configuration. The Free tier supports one custom domain, SSL, and up to 100 GB of bandwidth per month — more than enough for a technical blog. The feature that pushed me over the edge is <strong>preview environments</strong>: every pull request gets its own deployment URL automatically. I can review a post before merging it to main, which is the same workflow I&rsquo;d want on any production workload.</p>
+<p>The manual Blob + CDN approach gives you more control over CDN rules and origin configuration, but introduces two resources to manage instead of one, and you lose the PR preview feature. For this use case, the trade-off doesn&rsquo;t make sense.</p>
+<h3 id="azure-dns-zone">Azure DNS Zone<a hidden class="anchor" aria-hidden="true" href="#azure-dns-zone">#</a></h3>
+<p>If I&rsquo;m building the blog on Azure, the DNS should live there too. Having the DNS Zone in the same resource group as the SWA means the infrastructure is self-contained — one <code>az deployment sub create</code> and everything exists.</p>
+<p>The practical reason is that the CI/CD pipeline can patch the CNAME record programmatically after each infrastructure deployment, so the DNS always reflects the current SWA hostname without manual intervention.</p>
+<h3 id="key-vault-for-the-swa-deployment-token">Key Vault for the SWA deployment token<a hidden class="anchor" aria-hidden="true" href="#key-vault-for-the-swa-deployment-token">#</a></h3>
+<p>Static Web Apps uses a deployment token to authenticate push operations from the pipeline. This token is sensitive — anyone who has it can deploy arbitrary content to your site.</p>
+<p>The naive approach is to store it as a GitHub Secret. That works, but it means a human has to retrieve the token from the Azure portal, copy it, and paste it into GitHub. It also means the token lives in GitHub&rsquo;s secret store with no audit trail on the Azure side.</p>
+<p>My approach: Bicep reads the token directly from the SWA resource during deployment using <code>listSecrets()</code> and writes it to Key Vault. The pipeline then reads it from Key Vault using the WIF identity. No human ever touches the token. Rotation is a matter of running the infrastructure pipeline again.</p>
+<h3 id="workload-identity-federation-over-service-principal-secrets">Workload Identity Federation over Service Principal secrets<a hidden class="anchor" aria-hidden="true" href="#workload-identity-federation-over-service-principal-secrets">#</a></h3>
+<p>This is non-negotiable for me. A Service Principal with a client secret is a credential that expires, needs rotation, and can be leaked in logs, environment variables, or — if someone is having a bad day — a public git commit.</p>
+<p>Workload Identity Federation replaces the secret with a trust relationship: GitHub&rsquo;s OIDC provider issues a short-lived token for each workflow run, Azure validates it against a registered federated credential, and the pipeline gets a scoped Azure token that expires when the job ends. No secret. No rotation. No <code>AZURE_CLIENT_SECRET</code> in your GitHub Secrets list.</p>
+<p>The only values stored in GitHub Secrets are non-sensitive identifiers: <code>AZURE_CLIENT_ID</code>, <code>AZURE_TENANT_ID</code>, and <code>AZURE_SUBSCRIPTION_ID</code>. None of these are secrets in the cryptographic sense.</p>
+<hr>
+<h2 id="the-bicep-structure">The Bicep structure<a hidden class="anchor" aria-hidden="true" href="#the-bicep-structure">#</a></h2>
+<p>The infrastructure is organised as a subscription-scoped main template that orchestrates three modules:</p>
+<pre tabindex="0"><code>bicep/
+├── main.bicep           # Subscription scope — creates RG, calls modules
+├── modules/
+│   ├── dns.bicep        # DNS Zone + CNAME + TXT verification record
+│   ├── keyvault.bicep   # Key Vault + RBAC assignment for WIF identity
+│   └── swa.bicep        # Static Web App + custom domain + token → KV
+└── params/
+    └── prd.bicepparam   # Production parameter values
+</code></pre><h3 id="mainbicep--the-orchestrator">main.bicep — the orchestrator<a hidden class="anchor" aria-hidden="true" href="#mainbicep--the-orchestrator">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bicep" data-lang="bicep"><span style="display:flex;"><span><span style="color:#66d9ef">targetScope</span> = <span style="color:#e6db74">&#39;subscription&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">module</span> dnsZone <span style="color:#e6db74">&#39;modules/dns.bicep&#39;</span> = {
+</span></span><span style="display:flex;"><span>  name: <span style="color:#e6db74">&#39;deploy-dns&#39;</span>
+</span></span><span style="display:flex;"><span>  scope: rg
+</span></span><span style="display:flex;"><span>  params: {
+</span></span><span style="display:flex;"><span>    domainName: domainName
+</span></span><span style="display:flex;"><span>    tags: tags
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">module</span> keyVault <span style="color:#e6db74">&#39;modules/keyvault.bicep&#39;</span> = {
+</span></span><span style="display:flex;"><span>  name: <span style="color:#e6db74">&#39;deploy-keyvault&#39;</span>
+</span></span><span style="display:flex;"><span>  scope: rg
+</span></span><span style="display:flex;"><span>  params: {
+</span></span><span style="display:flex;"><span>    prefix: prefix
+</span></span><span style="display:flex;"><span>    location: location
+</span></span><span style="display:flex;"><span>    githubActionsObjectId: githubActionsObjectId
+</span></span><span style="display:flex;"><span>    tags: tags
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">module</span> staticWebApp <span style="color:#e6db74">&#39;modules/swa.bicep&#39;</span> = {
+</span></span><span style="display:flex;"><span>  name: <span style="color:#e6db74">&#39;deploy-swa&#39;</span>
+</span></span><span style="display:flex;"><span>  scope: rg
+</span></span><span style="display:flex;"><span>  params: {
+</span></span><span style="display:flex;"><span>    prefix: prefix
+</span></span><span style="display:flex;"><span>    location: location
+</span></span><span style="display:flex;"><span>    domainName: domainName
+</span></span><span style="display:flex;"><span>    keyVaultName: keyVault.outputs.keyVaultName
+</span></span><span style="display:flex;"><span>    tags: tags
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The dependency chain is implicit: <code>swa.bicep</code> references the Key Vault by name, so Bicep resolves the deployment order automatically.</p>
+<h3 id="the-token-handoff-in-swabicep">The token handoff in swa.bicep<a hidden class="anchor" aria-hidden="true" href="#the-token-handoff-in-swabicep">#</a></h3>
+<p>The most interesting part of the Bicep is how the SWA deployment token ends up in Key Vault without any manual step:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bicep" data-lang="bicep"><span style="display:flex;"><span><span style="color:#66d9ef">resource</span> swa <span style="color:#e6db74">&#39;Microsoft.Web/staticSites@2023-01-01&#39;</span> = {
+</span></span><span style="display:flex;"><span>  name: <span style="color:#e6db74">&#39;swa-</span><span style="color:#e6db74">${</span>prefix<span style="color:#e6db74">}</span><span style="color:#e6db74">-blog&#39;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// ...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">resource</span> swaTokenSecret <span style="color:#e6db74">&#39;Microsoft.KeyVault/vaults/secrets@2023-07-01&#39;</span> = {
+</span></span><span style="display:flex;"><span>  parent: keyVault
+</span></span><span style="display:flex;"><span>  name: <span style="color:#e6db74">&#39;swa-deployment-token&#39;</span>
+</span></span><span style="display:flex;"><span>  properties: {
+</span></span><span style="display:flex;"><span>    value: swa.<span style="color:#a6e22e">listSecrets</span>().properties.apiKey
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>listSecrets()</code> is a Bicep runtime function that calls the SWA management API and returns the deployment token. The result is written directly to Key Vault as part of the same deployment. The token never appears in any output, log, or parameter file.</p>
+<h3 id="rbac-in-keyvaultbicep">RBAC in keyvault.bicep<a hidden class="anchor" aria-hidden="true" href="#rbac-in-keyvaultbicep">#</a></h3>
+<p>Key Vault uses the RBAC authorisation model (no access policies). The WIF identity gets <code>Key Vault Secrets Officer</code> scoped to the vault:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bicep" data-lang="bicep"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> kvSecretsOfficerRoleId = <span style="color:#e6db74">&#39;b86a8fe4-44ce-4948-aee5-eccb2c155cd7&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">resource</span> githubActionsKvRole <span style="color:#e6db74">&#39;Microsoft.Authorization/roleAssignments@2022-04-01&#39;</span> = {
+</span></span><span style="display:flex;"><span>  name: <span style="color:#a6e22e">guid</span>(keyVault.id, githubActionsObjectId, kvSecretsOfficerRoleId)
+</span></span><span style="display:flex;"><span>  scope: keyVault
+</span></span><span style="display:flex;"><span>  properties: {
+</span></span><span style="display:flex;"><span>    roleDefinitionId: <span style="color:#a6e22e">subscriptionResourceId</span>(
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#39;Microsoft.Authorization/roleDefinitions&#39;</span>,
+</span></span><span style="display:flex;"><span>      kvSecretsOfficerRoleId
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    principalId: githubActionsObjectId
+</span></span><span style="display:flex;"><span>    principalType: <span style="color:#e6db74">&#39;ServicePrincipal&#39;</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Using <code>guid()</code> with deterministic inputs means the role assignment ID is stable across deployments — re-running the pipeline never creates a duplicate assignment.</p>
+<hr>
+<h2 id="the-pipelines">The pipelines<a hidden class="anchor" aria-hidden="true" href="#the-pipelines">#</a></h2>
+<h3 id="infrastructure-pipeline-deploy-infrayml">Infrastructure pipeline (deploy-infra.yml)<a hidden class="anchor" aria-hidden="true" href="#infrastructure-pipeline-deploy-infrayml">#</a></h3>
+<p>Triggers on changes to <code>bicep/**</code> or manually via <code>workflow_dispatch</code>. The job sequence is:</p>
+<ol>
+<li><strong>Lint</strong> — <code>az bicep lint</code> catches syntax errors before anything hits Azure</li>
+<li><strong>What-if</strong> — shows exactly what will change before applying</li>
+<li><strong>Deploy</strong> — <code>az deployment sub create</code> with the param file</li>
+<li><strong>Patch CNAME</strong> — updates the DNS record with the actual SWA hostname from the deployment output</li>
+</ol>
+<p>The what-if step is not optional ceremony — it&rsquo;s the equivalent of <code>terraform plan</code> and has caught real issues before they became real problems.</p>
+<h3 id="blog-pipeline-deploy-blogyml">Blog pipeline (deploy-blog.yml)<a hidden class="anchor" aria-hidden="true" href="#blog-pipeline-deploy-blogyml">#</a></h3>
+<p>Triggers on changes to <code>content/**</code>, <code>themes/**</code>, or Hugo config files. The sequence:</p>
+<ol>
+<li><strong>Hugo build</strong> — <code>hugo --minify --gc</code> with the <code>extended</code> version for SCSS support</li>
+<li><strong>Azure login</strong> — WIF token exchange, no secrets</li>
+<li><strong>Read token</strong> — <code>az keyvault secret show</code> retrieves the SWA deployment token</li>
+<li><strong>Deploy</strong> — <code>Azure/static-web-apps-deploy@v1</code> pushes the built site</li>
+<li><strong>PR comment</strong> — posts the preview URL on pull requests</li>
+</ol>
+<p>Pull requests get a staging environment automatically. The preview URL is posted as a PR comment, so reviewing a draft post before publishing is a first-class workflow.</p>
+<hr>
+<h2 id="setting-up-wif">Setting up WIF<a hidden class="anchor" aria-hidden="true" href="#setting-up-wif">#</a></h2>
+<p>Before any of this works, you need the Workload Identity Federation trust relationship in place. The <code>setup-wif.sh</code> script handles it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./scripts/setup-wif.sh &lt;subscription-id&gt; &lt;github-owner&gt; meeple-in-the-cloud-blog
+</span></span></code></pre></div><p>It creates a User-Assigned Managed Identity, registers two federated credentials (one for <code>main</code> branch pushes, one for pull requests), and assigns <code>Contributor</code> on the subscription for Bicep deployments. The Key Vault role assignment is handled by Bicep itself.</p>
+<p>The script outputs exactly what to add to GitHub Secrets and what to fill in <code>prd.bicepparam</code>. Follow it in order and the first infrastructure deployment will succeed on the first run.</p>
+<hr>
+<h2 id="cost-breakdown">Cost breakdown<a hidden class="anchor" aria-hidden="true" href="#cost-breakdown">#</a></h2>
+<table>
+	<thead>
+			<tr>
+					<th>Resource</th>
+					<th>SKU</th>
+					<th>Estimated monthly cost</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Azure Static Web Apps</td>
+					<td>Free</td>
+					<td>€0.00</td>
+			</tr>
+			<tr>
+					<td>Azure DNS Zone</td>
+					<td>Standard</td>
+					<td>~€0.50</td>
+			</tr>
+			<tr>
+					<td>Azure Key Vault</td>
+					<td>Standard</td>
+					<td>~€0.05</td>
+			</tr>
+			<tr>
+					<td><strong>Total</strong></td>
+					<td></td>
+					<td><strong>~€0.55/month</strong></td>
+			</tr>
+	</tbody>
+</table>
+<p>The DNS Zone is the only resource with meaningful cost, and it&rsquo;s priced per zone plus per million queries. A technical blog doesn&rsquo;t generate a million DNS queries in a month.</p>
+<hr>
+<h2 id="what-id-do-differently">What I&rsquo;d do differently<a hidden class="anchor" aria-hidden="true" href="#what-id-do-differently">#</a></h2>
+<p><strong>Private Endpoints are overkill here.</strong> The Key Vault is publicly accessible, which I&rsquo;d never accept on a workload that handles customer data. For a blog where the most sensitive thing in the vault is a static site deployment token, the operational complexity of a Private Endpoint and a self-hosted runner isn&rsquo;t justified. Know where to draw the line.</p>
+<p><strong>The SWA Free tier has limits.</strong> 100 GB bandwidth, one custom domain, no SLA. If this blog ever grows to the point where those limits matter, migrating to the Standard tier ($9/month) is a one-line change in the Bicep SKU. Starting on Free and moving up is the right call.</p>
+<hr>
+<h2 id="the-full-code">The full code<a hidden class="anchor" aria-hidden="true" href="#the-full-code">#</a></h2>
+<p>Everything — Bicep modules, pipeline definitions, and the setup script — is in the <a href="https://github.com/YOUR_GITHUB_USERNAME/meeple-in-the-cloud-infra">meeple-in-the-cloud-infra</a> repository. Fork it, update the parameter file, run the setup script, and you&rsquo;ll have your own blog infrastructure in Azure in under 20 minutes.</p>
+<p>The blog content, including this post, lives in <a href="https://github.com/YOUR_GITHUB_USERNAME/meeple-in-the-cloud-blog">meeple-in-the-cloud-blog</a>.</p>
+<hr>
+<p><em>Next up: Landing Zone from scratch — Management Groups, subscription design, and why the decisions you make on day one are the hardest to undo.</em></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/azure/">Azure</a></li>
+      <li><a href="http://localhost:1313/tags/bicep/">Bicep</a></li>
+      <li><a href="http://localhost:1313/tags/hugo/">Hugo</a></li>
+      <li><a href="http://localhost:1313/tags/github-actions/">Github-Actions</a></li>
+      <li><a href="http://localhost:1313/tags/static-web-apps/">Static-Web-Apps</a></li>
+      <li><a href="http://localhost:1313/tags/wif/">Wif</a></li>
+      <li><a href="http://localhost:1313/tags/dns/">Dns</a></li>
+      <li><a href="http://localhost:1313/tags/key-vault/">Key-Vault</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Meeple In The Cloud</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
