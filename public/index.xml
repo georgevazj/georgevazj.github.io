@@ -15,12 +15,5 @@
       <guid>http://localhost:1313/posts/deploying-this-blog-on-azure/</guid>
       <description>How I designed and deployed this blog using Hugo, Azure Static Web Apps, Bicep, and GitHub Actions with Workload Identity Federation. No secrets in the pipeline. No excuses.</description>
     </item>
-    <item>
-      <title>Hola Mundo</title>
-      <link>http://localhost:1313/posts/hola-mundo/</link>
-      <pubDate>Tue, 08 Sep 2026 08:15:07 +0200</pubDate>
-      <guid>http://localhost:1313/posts/hola-mundo/</guid>
-      <description></description>
-    </item>
   </channel>
 </rss>

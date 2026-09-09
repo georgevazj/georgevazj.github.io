@@ -46,8 +46,5 @@
   </url><url>
     <loc>http://localhost:1313/tags/wif/</loc>
     <lastmod>2026-09-09T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/hola-mundo/</loc>
-    <lastmod>2026-09-08T08:15:07+02:00</lastmod>
   </url>
 </urlset>
